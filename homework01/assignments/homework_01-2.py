@@ -1,5 +1,6 @@
 
 import random
+import numpy
 
 defined_patterns = {
     "I need ?X": ["Image you will get ?X soon", "Why do you need ?X ?"],
@@ -7,13 +8,14 @@ defined_patterns = {
 }
 
 
-# 1.判断两个语句是否相符，并输出特殊字符对应的词 i want ?X，  i want iphone (?X --- iphone)
 def is_variable(pat):
+    # 判断单个特殊字符 返回值：True / False
     return pat.startswith('?') and all(p.isalpha() for p in pat[1:])
 
 
-# 2. ?x i want ?y 形式的匹配方式
+#   i want ?y,  i want iphone 形式的匹配方式
 def pattern_match(pattern, saying):
+    # 返回匹配对象 [('?X', 'iphone')]
     if not pattern or not saying: return []
     if is_variable(pattern[0]):
         a = [(pattern[0], saying[0])]
@@ -26,21 +28,83 @@ def pattern_match(pattern, saying):
             return pattern_match(pattern[1:], saying[1:])
 
 
-# 3. 利用匹配的变量，并输出语句
 def pat_to_dict(pat_dict):
-    return {key: val for key, val in pat_dict}
+    # 根据匹配对象建立字典
+    return {key: ' '.join(val) if isinstance(val, list) else val for key, val in pat_dict}
 
 
 def subsitite(rule, parsed_rules):
+    # 根据字典建立的规则和 字符串输出完整的句子
     if not rule: return []
     return [parsed_rules.get(rule[0], rule[0])] + subsitite(rule[1:], parsed_rules)
 
 
+def is_pattern_segment(pat):
+    # '?*X' 判断是否匹配多个字符，
+    return pat.startswith('?*') and all(p.isalpha() for p in pat[2:])
+
+
+def pat_match_with_seg(pattern, saying):
+    # 返回匹配的规则
+    if not pattern or not saying:
+        return []
+    pat = pattern[0]
+    if is_variable(pat):
+        return [(pat, saying[0])] + pat_match_with_seg(pattern[1:], saying[1:])
+    elif pat == saying[0]:
+        return pat_match_with_seg(pattern[1:], saying[1:])
+    elif is_pattern_segment(pat):
+        match, index = segment_match(pattern, saying)
+        return [match] + pat_match_with_seg(pattern[1:], saying[index:])
+    else:
+        return False
+
+
+def segment_match(pattern, saying):
+    seg_pat, rest = pattern[0], pattern[1:]
+    seg_pat = seg_pat.replace('?*', '?')
+
+    if not rest: return (seg_pat, saying), len(saying)
+
+    for i, token in enumerate(saying):
+        if rest[0] == token and is_match(rest[1:], saying[(i + 1):]):
+            return (seg_pat, saying[:i]), i
+
+    return (seg_pat, saying), len(saying)
+
+
+def is_match(rest, saying):
+    if not rest and not saying:
+        return True
+    if not all(a.isalpha() for a in rest[0]):
+        return True
+    if rest[0] != saying[0]:
+        return False
+    return is_match(rest[1:], saying[1:])
+
+
+# '?*P is very good'  , "My dog and my cat is very good"
+# result = pat_match_with_seg('?*P is very good'.split(), "My dog and my cat is very good".split())
+# print(result)
+
+
+# def get_response(saying, rules):
+#     for pat, values in rules.items():
+#         if not pattern_match(pat.split(), saying.split()):
+#             continue
+#         parsed_rules = pat_to_dict(pattern_match(pat.split(), saying.split()))
+#         subsitite_rule = random.choice(values)
+#         res = subsitite(subsitite_rule.split(), parsed_rules)
+#         if res:
+#             return ' '.join(res)
+#     return None
+
+
 def get_response(saying, rules):
     for pat, values in rules.items():
-        if not pattern_match(pat.split(), saying.split()):
+        if not pat_match_with_seg(pat.split(), saying.split()):
             continue
-        parsed_rules = pat_to_dict(pattern_match(pat.split(), saying.split()))
+        parsed_rules = pat_to_dict(pat_match_with_seg(pat.split(), saying.split()))
         subsitite_rule = random.choice(values)
         res = subsitite(subsitite_rule.split(), parsed_rules)
         if res:
@@ -48,43 +112,11 @@ def get_response(saying, rules):
     return None
 
 
-def is_pattern_segment(pat):
-    return pat.startswith('?*') and all(p.isalpha() for p in pat[2:])
+rules = {
+    "?*X hello ?*Y": ["Hi, how do you do?"],
+    "I was ?*X": ["Were you really ?X ?", "I already knew you were ?X ."]
+}
 
-"""
-'?*P is very good'  , "My dog and my cat is very good"
-"""
+res = get_response('I was ', rules)
 
-def pattern_many(pattern, saying):
-    res = []
-    i, j = -1, -1
-    data = []
-    for index, pat in enumerate(pattern):
-        if is_pattern_segment(pat):
-            if i == -1:
-                i = index
-                p = pat
-            else:
-                res.append((p, data))
-                data = []
-                i = index
-                p = pat
-        else:
-            data = pattern[i+1: index+1]
-    res.append((p, data))
-    start = 0
-    for d in res:
-        length = len(d[1])
-        for i in range(len(saying)-length+1):
-            if d[1] == saying[i: length+i]:
-                print(d[0], '--->', saying[start: i])
-                start = length + i
-
-
-pattern_many('?*P is very good ?*Y abvc ?*Z e'.split(), "My dog and my cat is very good a b c d abvc abc d e".split())
-
-
-#
-# res = get_response('My son told me something', defined_patterns)
-#
-# print(res)
+print(res)
