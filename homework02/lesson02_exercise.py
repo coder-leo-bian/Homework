@@ -3,7 +3,7 @@ import json, requests
 
 
 def deal_subway_data():
-    with open('../../../beijing.xml') as f:
+    with open('../beijing.xml') as f:
         datas = f.read()
     pattern = re.compile('\s+lb="(\w+)"')
     station = re.findall(pattern, datas)
@@ -90,11 +90,14 @@ def search(start, stop, subway_map):
     visited = []
     all_pathes = []
     while pathes:
-        path = pathes.pop()
+        print(len(pathes))
+        path = pathes.pop(0)
         current_station = path[-1]
+        # if current_station in visited: continue
         for succ in subway_map[current_station]:
-            if succ in visited: continue
+            if succ in path and succ in visited: continue
             new_path = path + [succ]
+            # if new_path not in pathes:
             pathes.append(new_path)
             if succ == stop:
                 all_pathes.append(new_path)
@@ -102,6 +105,5 @@ def search(start, stop, subway_map):
     return all_pathes
 
 
-
-print(search('十里河', '国贸', subway_map))
-
+for i in (search('十里河', '西二旗', subway_map)):
+    print(i)
