@@ -7,14 +7,12 @@ def deal_subway_data():
         datas = f.read()
     pattern = re.compile('\s+lb="(\w+)"')
     station = re.findall(pattern, datas)
-    pattern1 = re.compile('<l lid="\w+" lb="(\w+)"')
+    pattern1 = re.compile('<l lid="\w+"\s+lb="(\w+)"')
     lines = re.findall(pattern1, datas)
-    lines.insert(6, '8号线北')
-    lines.insert(7, '8号线南')
     return station, lines
 
-station, lines = deal_subway_data()
 
+station, lines = deal_subway_data()
 
 
 # def subway_location_func(address):
@@ -78,9 +76,12 @@ def subways_related(lines, station):
                 elif i == (len(vals) - 1):
                     subway_map[v] = subway_map[v] + [vals[i - 1]]
                 else:
+                    if v == '西局':
+                        print(v)
                     subway_map[v] = subway_map[v] + [vals[i - 1], vals[i + 1]]
 
     return subway_map
+
 
 subway_map = subways_related(lines, station)
 
@@ -90,20 +91,18 @@ def search(start, stop, subway_map):
     visited = []
     all_pathes = []
     while pathes:
-        print(len(pathes))
         path = pathes.pop(0)
         current_station = path[-1]
-        # if current_station in visited: continue
+        if current_station in visited: continue
         for succ in subway_map[current_station]:
             if succ in path and succ in visited: continue
             new_path = path + [succ]
-            # if new_path not in pathes:
             pathes.append(new_path)
             if succ == stop:
                 all_pathes.append(new_path)
         visited.append(current_station)
     return all_pathes
-
+#
 
 for i in (search('十里河', '西二旗', subway_map)):
     print(i)
