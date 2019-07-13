@@ -5,7 +5,7 @@ from operator import itemgetter
 
 
 def deal_subway_data():
-    with open('../beijing.xml') as f:
+    with open('beijing.xml') as f:
         datas = f.read()
     pattern = re.compile('\s+lb="(\w+)"')
     station = re.findall(pattern, datas)
@@ -67,7 +67,7 @@ def check_better_lines(start_to_stop, all_lines):
     for ss in start_to_stop:
         best_line = None
         for line in all_lines:
-            if line[0] == ss[0] and line[-1] == line[-1]:
+            if line[0] == ss[0] and line[-1] == ss[-1]:
                 if not best_line:
                     best_line = line
                 elif len(line) < len(best_line):
@@ -75,7 +75,8 @@ def check_better_lines(start_to_stop, all_lines):
                 elif len(line) == len(best_line):
                     better_lines.append(best_line)
                     best_line = line
-        better_lines.append(best_line)
+        if best_line:
+            better_lines.append(best_line)
     return better_lines
 
 
@@ -98,11 +99,12 @@ def search_lines_graph(start_station_line, stop_station_line, subway_line):
             if station in seened and station == line[1]: continue
             for successor in subway_line[station]:
                 if successor in seened: continue
-                new_path = path + [successor]
-                pathes.append(new_path)
-                if successor == line[1]:
-                    if new_path not in all_lines:
-                        all_lines.append(new_path)
+                if successor not in start_station_line:
+                    new_path = path + [successor]
+                    pathes.append(new_path)
+                    if successor == line[1]:
+                        if new_path not in all_lines:
+                            all_lines.append(new_path)
             seened.append(station)
     better_lines = check_better_lines(start_to_stop, all_lines)
     return better_lines
@@ -119,18 +121,23 @@ def search_station_graph(start, stop, better_lines, subways):
         while pathes:
             path = pathes.pop(0)
             station = path[-1]
+            if station == '知春路':
+                print(station)
             if station in seened and station == stop: continue
             for successor in station_graph[station]:
+                if station == stop:
+                    break
                 if successor in seened: continue
                 new_path = path + [successor]
                 pathes.append(new_path)
                 if successor == stop:
                     best_lines.append({'/'.join(line): new_path})
-            seened.append(station)
+            if station != stop:
+                seened.append(station)
     return best_lines
 
 
-def search(start, stop, subways, subway_line, subway_station):
+def search(start, stop, subways, subway_line, subway_station, sortfunction=None):
     """搜索返回最优路线"""
     start_station_line = []
     stop_station_line = []
@@ -144,7 +151,8 @@ def search(start, stop, subways, subway_line, subway_station):
 
     best_lines = search_station_graph(start, stop, better_lines, subways)
 
-    return best_lines
+    return sortfunction(best_lines)  if sortfunction else best_lines
+
 
 
 def shortest_transfer_sort(best_lines):
@@ -154,18 +162,18 @@ def shortest_transfer_sort(best_lines):
     return best_lines
 
 
-def main(start, stop, sortfunction):
+def main(start, stop, sortfunction=None):
     station, lines = deal_subway_data()
     subways = subways_related(lines, station) # 每条线对应的地铁站
     subway_line = graph_subway_lines(subways) # 每条地铁线的关系图
     subway_station = graph_subway_station(subways) # 每一站的换乘关系图
-    best_lines = search(start, stop, subways, subway_line, subway_station)
-    for i in sortfunction(best_lines):
-        print(i)
+    best_lines = search(start, stop, subways, subway_line, subway_station, sortfunction)
+    return best_lines
 
 
 if __name__ == '__main__':
-    main('十里河', '西二旗', shortest_transfer_sort)
+    for i in main('天安门西', '青年路', shortest_transfer_sort):
+        print(i)
 
 
 
@@ -204,3 +212,5 @@ if __name__ == '__main__':
 #
 # for k, v in subway_location.items():
 #     subway_location[k] = (float(v[0]), float(v[1]))
+
+prin
