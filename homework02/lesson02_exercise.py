@@ -212,5 +212,3 @@ if __name__ == '__main__':
 #
 # for k, v in subway_location.items():
 #     subway_location[k] = (float(v[0]), float(v[1]))
-
-prin

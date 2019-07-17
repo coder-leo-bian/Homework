@@ -32,6 +32,7 @@ def edit_distance(string1, string2):
     return min_distance
 
 
-edit_distance('bi', 'be')
+edit_distance('be', 'begin')
 for k, v in solution.items():
     print(k, ': ', v)
+
