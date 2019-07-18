@@ -19,9 +19,11 @@ def edit_distance(string1, string2):
     ]
 
     if tail_s1 == tail_s2:
-        both_forward = (edit_distance(string1[:-1], string2[:-1]) + 0, '')
+        c = edit_distance(string1[:-1], string2[:-1]) + 0
+        both_forward = (c, '')
     else:
-        both_forward = (edit_distance(string1[:-1], string2[:-1]) + 1, 'SUB {} => {}'.format(tail_s1, tail_s2))
+        d = edit_distance(string1[:-1], string2[:-1]) + 1
+        both_forward = (d, 'SUB {} => {}'.format(tail_s1, tail_s2))
 
     candidates.append(both_forward)
 
@@ -32,7 +34,23 @@ def edit_distance(string1, string2):
     return min_distance
 
 
-edit_distance('be', 'begin')
+def parse_solution(string1, string2):
+
+    if not string1:
+        return []
+
+    k = (string1, string2)
+
+    res = parse_solution(string1[:-1], string2) + [{k:solution[(string1, string2)]}]
+
+    return res
+
+
+
+string1 = 'be'
+string2 = 'beg'
+edit_distance(string1, string2)
 for k, v in solution.items():
     print(k, ': ', v)
 
+print(parse_solution(string1, string2))
