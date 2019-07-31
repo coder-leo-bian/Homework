@@ -1,0 +1,12 @@
+2019-07-31 15:31:24,434 - homework04.py[line:52] - INFO: 进入predict_model函数，开始时间：1564558284.434137
+2019-07-31 15:31:24,434 - utils.py[line:422] - INFO: loading Word2Vec object from ../../wikiex/cut_result_bak
+2019-07-31 15:31:24,434 - smart_open_lib.py[line:378] - WARNING: this function is deprecated, use smart_open.open instead
+2019-07-31 15:31:25,245 - utils.py[line:456] - INFO: loading wv recursively from ../../wikiex/cut_result_bak.wv.* with mmap=None
+2019-07-31 15:31:25,245 - utils.py[line:494] - INFO: setting ignored attribute vectors_norm to None
+2019-07-31 15:31:25,245 - utils.py[line:456] - INFO: loading vocabulary recursively from ../../wikiex/cut_result_bak.vocabulary.* with mmap=None
+2019-07-31 15:31:25,245 - utils.py[line:456] - INFO: loading trainables recursively from ../../wikiex/cut_result_bak.trainables.* with mmap=None
+2019-07-31 15:31:25,246 - utils.py[line:494] - INFO: setting ignored attribute cum_table to None
+2019-07-31 15:31:25,246 - utils.py[line:428] - INFO: loaded ../../wikiex/cut_result_bak
+2019-07-31 15:31:25,326 - keyedvectors.py[line:1331] - INFO: precomputing L2-norms of word weight vectors
+2019-07-31 15:31:25,377 - homework04.py[line:54] - INFO: predict_model函数执行结束，总用时时间：0.9437530040740967
+2019-07-31 15:31:25,378 - homework04.py[line:55] - INFO: **************************************************分割线**************************************************
